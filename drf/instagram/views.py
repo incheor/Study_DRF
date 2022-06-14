@@ -2,9 +2,14 @@
 # from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.decorators import api_view, action
+from rest_framework.generics import RetrieveAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+
+from .permissions import IsAuthorOrReadonly
 from .serializers import PostSerializer
 from .models import Post
 
@@ -48,6 +53,12 @@ class PostViewSet(ModelViewSet):
     # 위 5개 분기를 아래 두 정보만으로 다 처리할 수 있음
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated, IsAuthorOrReadonly]  # 로그인 인증이 되어 있음을 보장 받을 수 있음
+
+    def perform_create(self, serializer):
+        author = self.request.user  # User or Anonymous
+        ip = self.request.META['REMOTE_ADDR']
+        serializer.save(author=author, ip=ip)
 
     # 공개된 포스트 목록 조회
     @action(detail=False, methods=['GET'])
@@ -68,3 +79,19 @@ class PostViewSet(ModelViewSet):
         instance.save(update_fields=['is_public'])
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+
+class PostDetailAPIView(RetrieveAPIView):
+    queryset = Post.objects.all()
+    renderer_classes = [TemplateHTMLRenderer]
+    # 1번 방법
+    template_name = 'instagram/post_detail.html'
+
+    def get(self, request, *args, **kwargs):
+        post = self.get_object()
+        return Response({
+            'post': PostSerializer(post).data,
+        },
+            # 2번 방법
+            # template_name='instagram/post_detail.html'
+        )

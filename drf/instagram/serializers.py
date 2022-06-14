@@ -18,5 +18,5 @@ class PostSerializer(serializers.ModelSerializer):
         fields = [
             'pk', 'author_username', 'message',
             'created_at', 'updated_at',
-            'is_public'
+            'is_public', 'ip'
         ]

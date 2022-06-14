@@ -9,4 +9,5 @@ router.register('post', views.PostViewSet)
 urlpatterns = [
     path('', include(router.urls)),  # url 매핑까지 간단하게 할 수 있음
     # path('public/', views.public_post_list),
+    path('mypost/<int:pk>/', views.PostDetailAPIView.as_view()),
 ]
