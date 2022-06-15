@@ -25,8 +25,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 서드파티 앱
     'rest_framework',
+    'rest_framework.authtoken',
     # 로컬 앱
     'instagram',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -106,7 +108,24 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    ],
+    'PAGE_SIZE': 5,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '3/day',
+    }
+}
+
+JWT_AUTH = {
+    'JWT_ALLOW_REFRESH': True,
 }
